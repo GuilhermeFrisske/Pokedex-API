@@ -1,558 +1,392 @@
-Lower
-friskalho
-Não perturbar
+  import React, { useState, useEffect, useMemo } from 'react';
+  import {
+    View,
+    Text,
+    StyleSheet,
+    FlatList,
+    Image,
+    ActivityIndicator,
+    SafeAreaView,
+    StatusBar,
+    TextInput,
+    Animated,
+    Pressable,
+  } from 'react-native';
 
-Lower — 06/12/2024 13:55
-mYj7sEkhJWYSa8j
-Lower — 13/12/2024 11:40
-PItuco$$2005
-kU52P3WQLB8zDK%
-Lower — 05/01/2025 11:49
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-    <head>
-Expandir
-message.txt
-19 KB
-Lower — 13/01/2025 16:18
-Imagem
-Imagem
-Imagem
-Lower — 13/01/2025 16:26
-java
-Lower — 17/01/2025 11:13
-]
-Tipo de arquivo em anexo: acrobat
-Certificado.pdf
-204.19 KB
-Lower — 17/01/2025 12:23
-https://dash.parsec.app/forgot
-Pituco$$2005
-Lower — 18/01/2025 11:42
-Imagem
-Lower — 18/01/2025 12:01
-Tipo de arquivo em anexo: acrobat
-CV_GuilhermeFrisskeNunes.docx (2).pdf
-65.28 KB
-Lower — 30/01/2025 15:15
-2508199
-42528714840
-Lower — 07/02/2025 22:02
-require("dotenv").config();
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
+  // ================== CONSTANTES ==================
+  const POKE_API_BASE_URL = 'https://pokeapi.co/api/v2/pokemon';
+  const PAGE_LIMIT = 100;
 
-// Configuração do servidor
-const app = express();
-app.use(express.json());
-app.use(cors());
+  // ================== HELPERS ==================
+  const capitalizeFirstLetter = (string) =>
+    string.charAt(0).toUpperCase() + string.slice(1);
 
-// Conexão com MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log("MongoDB Conectado"))
-.catch(err => console.log(err));
+  // Sprite animada + shiny com fallback
+  const getPokemonSprite = (pokemon, shiny) => {
+    if (!pokemon) return null;
 
-// Modelo de Tarefa
-const TaskSchema = new mongoose.Schema({
-  title: String,
-  completed: { type: Boolean, default: false }
-});
-const Task = mongoose.model("Task", TaskSchema);
+    const animated =
+      pokemon.sprites?.versions?.['generation-v']?.['black-white']?.animated;
 
-// Rotas CRUD
-app.get("/tasks", async (req, res) => {
-  const tasks = await Task.find();
-  res.json(tasks);
-});
+    if (animated) {
+      return shiny
+        ? animated.front_shiny || animated.front_default
+        : animated.front_default;
+    }
 
-app.post("/tasks", async (req, res) => {
-  const newTask = new Task(req.body);
-  await newTask.save();
-  res.json(newTask);
-});
+    return shiny
+      ? pokemon.sprites.front_shiny
+      : pokemon.sprites.front_default;
+  };
 
-app.put("/tasks/:id", async (req, res) => {
-  const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  res.json(updatedTask);
-});
+  // ================== APP ==================
+  export default function App() {
+    const [listLoading, setListLoading] = useState(true);
+    const [detailLoading, setDetailLoading] = useState(false);
+    const [pokemonList, setPokemonList] = useState([]);
+    const [selectedPokemon, setSelectedPokemon] = useState(null);
+    const [selectedIndex, setSelectedIndex] = useState(null);
+    const [nextPageUrl, setNextPageUrl] = useState(null);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [search, setSearch] = useState('');
+    const [isShiny, setIsShiny] = useState(false);
 
-app.delete("/tasks/:id", async (req, res) => {
-  await Task.findByIdAndDelete(req.params.id);
-  res.json({ message: "Tarefa removida" });
-});
+    // ================== ANIMAÇÃO ==================
+    const slideAnim = useState(new Animated.Value(0))[0];
+    const fadeAnim = useState(new Animated.Value(1))[0];
 
-// Iniciar servidor
-app.listen(process.env.PORT  5000, () => console.log(`Servidor rodando na porta ${process.env.PORT  5000}`));
-Lower — 09/02/2025 18:22
-Link de Instagram: https://ig.me/1XEhGkIooQSXWld. N?o o compartilhe.
-Instagram
-Instagram
-Imagem
-Lower — 12/02/2025 14:06
-Profissional com conhecimento em desenvolvimento de sistemas, apaixonado por tecnologia e inovação. Possui habilidades em lógica de programação, análise de requisitos e experiência com Python, Java, JavaScript, HTML e CSS. Também tem familiaridade com sistemas gráficos e planilhas, aplicando esses conhecimentos para otimizar processos e desenvolver soluções eficientes.
-Lower — 22/02/2025 22:42
-Imagem
-Lower — 10/04/2025 14:55
-Imagem
-Lower — 10/04/2025 15:08
-Imagem
-Lower — 12/04/2025 12:27
-https://youtu.be/QxQIvsgYrEo?si=MaGfZhQV0Kht15yh
-YouTube
-MASTER TUTORIAIS
-COMO BAIXAR E INSTALAR O MICROSOFT OFFICE GRÁTIS OFICIAL COMPLETO ...
-Imagem
-Lower — 07/05/2025 11:24
-Olá, Bom dia! Me chamo Guilherme Frisske, tenho 19 anos e estou em busca de uma oportunidade como Jovem Aprendiz TI. Vi que vocês estão com vagas abertas e gostaria de me candidatar.
-Segue em anexo o meu currículo. Desde já, agradeço pela atenção!
-Lower — 07/05/2025 15:43
-DUCS
-Lower — 24/05/2025 11:33
-Comunicado Interno
+    const animatePokemonChange = (direction) => {
+      slideAnim.setValue(direction === 'right' ? 40 : -40);
+      fadeAnim.setValue(0);
 
-Informamos que, a partir de [data de início, se aplicável], a empresa ESA passará a encerrar temporariamente suas atividades durante o horário de almoço, das 12h às 13h.
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    };
 
-Essa medida tem como objetivo proporcionar mais qualidade de vida aos colaboradores, que antes contavam com poucos minutos para se alimentar e, em muitos casos, não conseguiam sequer realizar a pausa para o almoço devido à alta demanda de trabalho.
+    // ================== FETCH LISTA ==================
+    useEffect(() => {
+      const fetchPokemonList = async () => {
+        try {
+          setListLoading(true);
+          const response = await fetch(
+            `${POKE_API_BASE_URL}?limit=${PAGE_LIMIT}`
+          );
+          const data = await response.json();
+          setPokemonList(data.results);
+          setNextPageUrl(data.next);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setListLoading(false);
+        }
+      };
 
-Contamos com a compreensão e colaboração de todos.
+      fetchPokemonList();
+    }, []);
 
-Atenciosamente,
-[Nome ou setor responsável]
-Empresa ESA
-Lower — 29/05/2025 11:40
-Imagem
-Lower — 12/06/2025 14:55
-Tipo de arquivo em anexo: document
-Curriculo_GuilhermeFrisskeNunes.docx
-27.93 KB
-Lower — 19/06/2025 12:01
-Imagem
-Lower — 19/06/2025 13:39
-Imagem
-Lower — 30/06/2025 15:03
-// Simulando uma API que consulta CPF
-const cpf = '12345678900'; // CPF de exemplo
-const apiKey = 'SUA_CHAVE_DE_API'; // normalmente é necessário
-
-fetch(https://api.exemplo.com/consulta-cpf/${cpf}, {
-  method: 'GET',
-  headers: {
-    'Authorization': Bearer ${apiKey},
-    'Content-Type': 'application/json'
-  }
-})
-.then(response => response.json())
-.then(data => {
-  console.log('Resultado da consulta:', data);
-})
-.catch(error => {
-  console.error('Erro na consulta:', error);
-});
-
-============================== 
-import requests
-
-Dados simulados
-cpf = "12345678900"
-api_key = "SUA_CHAVE_DE_API"  # API key que o serviço real exige
-
-Endpoint simulado
-url = f"https://api.exemplo.com/consulta-cpf/%7Bcpf%7D"
-
-Requisição GET com autenticação
-headers = {
-    "Authorization": f"Bearer {api_key}",
-    "Content-Type": "application/json"
-}
-
-Fazendo a requisição
-try:
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    dados = response.json()
-
-    # Exibindo os dados retornados
-    print("Resultado da consulta:")
-    print(f"Nome: {dados['nome']}")
-    print(f"CPF: {dados['cpf']}")
-    print(f"Data de Nascimento: {dados['nascimento']}")
-    print(f"Situação: {dados['situacao']}")
-    print(f"Score de Crédito: {dados['score_credito']}")
-except requests.exceptions.RequestException as e:
-    print("Erro na requisição:", e)
-Lower — 07/07/2025 13:48
-Tipo de arquivo em anexo: acrobat
-Misturas_e_Separacoes_Guilherme.pdf
-1.75 KB
-Lower — 12/07/2025 19:48
-Imagem
-Lower — 17/07/2025 16:15
-Imagem
-Lower — 17/07/2025 16:22
-Imagem
-Imagem
-Imagem
-Lower — 17/07/2025 16:51
-Imagem
-Lower — 17/07/2025 17:12
-Imagem
-Lower — 17/07/2025 19:18
-Imagem
-Lower — 18/07/2025 11:52
-Imagem
-Lower — 18/07/2025 12:31
-Imagem
-Lower — 20/07/2025 11:47
-Imagem
-Lower — 22/07/2025 13:06
-Imagem
-Lower — 22/07/2025 20:20
-2MGROUPSMEMBERS
-Lower — 29/08/2025 12:54
-Tipo de arquivo em anexo: document
-atividade_pratica_convergencia_Guilherme_Frisske_Nunes.docx
-290.15 KB
-Lower — 07/09/2025 15:05
-SELECT c.nome AS cliente, p.nome_produto AS produto
-FROM pedidos ped
-JOIN clientes c ON ped.id_cliente = c.id_cliente
-JOIN produtos p ON ped.id_produto = p.id_produto;
-2️⃣ Mostre os pedidos com o nome do cliente, produto, quantidade e o valor total (quantidade * preço)
-sql
-Copiar código
-SELECT c.nome AS cliente, 
-       p.nome_produto AS produto, 
-       ped.quantidade, 
-       (ped.quantidade * p.preco) AS valor_total
-FROM pedidos ped
-JOIN clientes c ON ped.id_cliente = c.id_cliente
-JOIN produtos p ON ped.id_produto = p.id_produto;
-3️⃣ Liste todos os clientes que fizeram pedidos de "Mouse"
-sql
-Copiar código
-SELECT DISTINCT c.nome AS cliente
-FROM pedidos ped
-JOIN clientes c ON ped.id_cliente = c.id_cliente
-JOIN produtos p ON ped.id_produto = p.id_produto
-WHERE p.nome_produto = 'Mouse';
-4️⃣ Exiba o nome do cliente e o número de pedidos que ele realizou
-sql
-Copiar código
-SELECT c.nome AS cliente, COUNT(ped.id_pedido) AS total_pedidos
-FROM clientes c
-LEFT JOIN pedidos ped ON c.id_cliente = ped.id_cliente
-GROUP BY c.nome;
-5️⃣ Mostre quais produtos foram vendidos para clientes de São Paulo
-sql
-Copiar código
-SELECT DISTINCT p.nome_produto AS produto
-FROM pedidos ped
-JOIN clientes c ON ped.id_cliente = c.id_cliente
-JOIN produtos p ON ped.id_produto = p.id_produto
-WHERE c.cidade = 'São Paulo';
-Lower — 18/09/2025 13:15
-O salário mínimo é a remuneração mais básica que uma pessoa pode receber, de acordo com a CLT. Mas ele não precisa corresponder a certos parâmetros, como a variação da inflação, por exemplo. Ele é fixado em um determinado ano e continuará assim até poder ser reavaliado.
-
-Questão 1Resposta
-Verdadeiro
-Falso 
-Feedback
-Expandir
-message.txt
-5 KB
-Lower — 25/10/2025 10:06
-Tipo de arquivo em anexo: unknown
-DOC-20251025-WA0006
-100.58 KB
-Lower — Ontem às 12:47
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-Expandir
-message.txt
-7 KB
-﻿
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Image,
-  TouchableOpacity,
-  ActivityIndicator,
-  SafeAreaView,
-  StatusBar,
-} from 'react-native';
-
-// URL da API
-const POKE_API_BASE_URL = 'https://pokeapi.co/api/v2/pokemon';
-const PAGE_LIMIT = 100;
-
-
-const capitalizeFirstLetter = (string) => {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-};
-
-export default function App() {
-  const [listLoading, setListLoading] = useState(true);
-  const [detailLoading, setDetailLoading] = useState(false);
-  const [pokemonList, setPokemonList] = useState([]);
-  const [selectedPokemon, setSelectedPokemon] = useState(null);
-
-
-  const [nextPageUrl, setNextPageUrl] = useState(null);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-
-
-
-
-  useEffect(() => {
-    const fetchPokemonList = async () => {
+    // ================== FETCH DETALHES ==================
+    const fetchPokemonDetails = async (url) => {
       try {
-        setListLoading(true);
-        const response = await fetch(
-          `${POKE_API_BASE_URL}?limit=${PAGE_LIMIT}`
-        );
+        setDetailLoading(true);
+        const response = await fetch(url);
         const data = await response.json();
-        setPokemonList(data.results);
-        setNextPageUrl(data.next);
+        setSelectedPokemon(data);
       } catch (error) {
-        console.error('Erro ao buscar lista:', error);
+        console.error(error);
       } finally {
-        setListLoading(false);
+        setDetailLoading(false);
       }
     };
-    fetchPokemonList();
-  }, []);
 
+    // ================== FILTRO ==================
+    const filteredPokemon = useMemo(() => {
+      return pokemonList.filter((p) =>
+        p.name.toLowerCase().includes(search.toLowerCase())
+      );
+    }, [pokemonList, search]);
 
-  const fetchPokemonDetails = async (url) => {
-    try {
-      setDetailLoading(true);
-      setSelectedPokemon(null);
-      const response = await fetch(url);
-      const data = await response.json();
-      setSelectedPokemon(data);
-    } catch (error) {
-      console.error('Erro ao buscar detalhes:', error);
-    } finally {
-      setDetailLoading(false);
-    }
-  };
+    // ================== NAVEGAÇÃO ==================
+    const goToPreviousPokemon = () => {
+      if (selectedIndex > 0) {
+        animatePokemonChange('left');
+        const newIndex = selectedIndex - 1;
+        setSelectedIndex(newIndex);
+        fetchPokemonDetails(filteredPokemon[newIndex].url);
+      }
+    };
 
+    const goToNextPokemon = () => {
+      if (selectedIndex < filteredPokemon.length - 1) {
+        animatePokemonChange('right');
+        const newIndex = selectedIndex + 1;
+        setSelectedIndex(newIndex);
+        fetchPokemonDetails(filteredPokemon[newIndex].url);
+      }
+    };
 
-  const loadMorePokemon = async () => {
+    // ================== LOAD MORE ==================
+    const loadMorePokemon = async () => {
+      if (isLoadingMore || !nextPageUrl || search) return;
 
-    if (isLoadingMore || !nextPageUrl) {
-      return;
-    }
+      try {
+        setIsLoadingMore(true);
+        const response = await fetch(nextPageUrl);
+        const data = await response.json();
+        setPokemonList((prev) => [...prev, ...data.results]);
+        setNextPageUrl(data.next);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoadingMore(false);
+      }
+    };
 
-    try {
-      setIsLoadingMore(true);
-      const response = await fetch(nextPageUrl);
-      const data = await response.json();
-
-      setPokemonList((prevList) => [...prevList, ...data.results]);
-      setNextPageUrl(data.next);
-    } catch (error) {
-      console.error('Erro ao carregar mais:', error);
-    } finally {
-      setIsLoadingMore(false);
-    }
-  };
-
-  const renderDetailCard = () => (
-    <View style={styles.screenContainer}>
-      <View style={styles.screen}>
-        {detailLoading ? (
-          <ActivityIndicator size="large" color="#333" />
-        ) : selectedPokemon ? (
-          <>
-            <Image
-              style={styles.pokemonImage}
-              source={{ uri: selectedPokemon.sprites.front_default }}
-            />
-            <Text style={styles.detailTitle}>
-              {capitalizeFirstLetter(selectedPokemon.name)}
-            </Text>
-            <Text style={styles.detailText}>
-              Tipo: {selectedPokemon.types.map((t) => t.type.name).join(', ')}
-            </Text>
-            <Text style={styles.detailText}>
-              Peso: {selectedPokemon.weight / 10} kg
-            </Text>
-          </>
-        ) : (
-          <Text style={styles.detailText}></Text>
-        )}
-      </View>
-    </View>
-  );
-
-
-  const renderListItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.listItem}
-      onPress={() => fetchPokemonDetails(item.url)}>
-      <Text style={styles.listItemText}>
-        {capitalizeFirstLetter(item.name)}
-      </Text>
-    </TouchableOpacity>
-  );
-
-
-  const renderFooter = () => {
-    if (!isLoadingMore) return null;
+    // ================== RENDER ==================
     return (
-      <View style={{ paddingVertical: 20 }}>
-        <ActivityIndicator size="large" color="#FFF" />
-      </View>
-    );
-  };
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" />
 
+        {/* CARD DETALHES */}
+        <View style={styles.screenContainer}>
+          <View style={styles.screen}>
+            {detailLoading ? (
+              <ActivityIndicator size="large" color="#333" />
+            ) : selectedPokemon ? (
+              <>
+                <View style={styles.arrowContainer}>
+                  <Pressable
+                    onPress={goToPreviousPokemon}
+                    disabled={selectedIndex === 0}
+                    style={({ pressed }) => [
+                      styles.arrowButton,
+                      pressed && styles.arrowPressed,
+                      selectedIndex === 0 && styles.arrowDisabled,
+                    ]}>
+                    <Text style={styles.arrowIcon}>‹</Text>
+                  </Pressable>
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" />
-      <View style={styles.header}>
-        <View style={styles.lightsContainer}>
-          <View style={[styles.light, styles.lightBlue]} />
-          <View style={[styles.light, styles.lightRed]} />
-          <View style={[styles.light, styles.lightYellow]} />
-          <View style={[styles.light, styles.lightGreen]} />
+                  <Animated.View
+                    style={{
+                      opacity: fadeAnim,
+                      transform: [{ translateX: slideAnim }],
+                    }}>
+                    <View style={styles.pokemonImageWrapper}>
+                      <Image
+                        style={styles.pokemonImage}
+                        source={{
+                          uri: getPokemonSprite(selectedPokemon, isShiny),
+                        }}
+                      />
+                    </View>
+                  </Animated.View>
+
+                  <Pressable
+                    onPress={goToNextPokemon}
+                    disabled={selectedIndex === filteredPokemon.length - 1}
+                    style={({ pressed }) => [
+                      styles.arrowButton,
+                      pressed && styles.arrowPressed,
+                      selectedIndex === filteredPokemon.length - 1 &&
+                        styles.arrowDisabled,
+                    ]}>
+                    <Text style={styles.arrowIcon}>›</Text>
+                  </Pressable>
+                </View>
+
+                <Pressable
+                  onPress={() => setIsShiny((prev) => !prev)}
+                  style={styles.shinyButton}>
+                  <Text style={styles.shinyText}>
+                    {isShiny ? 'Shiny' : 'Normal'}
+                  </Text>
+                </Pressable>
+
+                <Text style={styles.detailTitle}>
+                  {capitalizeFirstLetter(selectedPokemon.name)}
+                </Text>
+
+                <Text style={styles.detailText}>
+                  Tipo:{' '}
+                  {selectedPokemon.types.map((t) => t.type.name).join(', ')}
+                </Text>
+
+                <Text style={styles.detailText}>
+                  Peso: {selectedPokemon.weight / 10} kg
+                </Text>
+              </>
+            ) : (
+              <Text style={styles.detailText}>Selecione um Pokémon</Text>
+            )}
+          </View>
         </View>
-      </View>
-      {renderDetailCard()}
 
-      
-      <View style={styles.listContainer}>
-        {listLoading ? (
-          <ActivityIndicator size="large" color="#fff" style={{ flex: 1 }} />
-        ) : (
-          
-          <FlatList
-            data={pokemonList}
-            renderItem={renderListItem}
-            keyExtractor={(item) => item.name}
-            style={styles.list}
-           
-            onEndReached={loadMorePokemon}
-            
-            onEndReachedThreshold={0.5}
-            
-            ListFooterComponent={renderFooter}
+        {/* LISTA */}
+        <View style={styles.listContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Pesquisar Pokémon..."
+            placeholderTextColor="#AAA"
+            value={search}
+            onChangeText={setSearch}
           />
-        )}
-      </View>
-    </SafeAreaView>
-  );
-}
 
+          {listLoading ? (
+            <ActivityIndicator size="large" color="#fff" />
+          ) : (
+            <FlatList
+              data={filteredPokemon}
+              renderItem={({ item, index }) => (
+                <Pressable
+                  style={styles.listItem}
+                  onPress={() => {
+                    setSelectedIndex(index);
+                    fetchPokemonDetails(item.url);
+                  }}>
+                  <Text style={styles.listItemText}>
+                    {capitalizeFirstLetter(item.name)}
+                  </Text>
+                </Pressable>
+              )}
+              keyExtractor={(item) => item.name}
+              onEndReached={loadMorePokemon}
+              onEndReachedThreshold={0.5}
+              showsVerticalScrollIndicator={false}
+            />
+          )}
+        </View>
+      </SafeAreaView>
+    );
+  }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#DC0A2D', // Vermelho PokÃ©dex
-    alignItems: 'center',
-  },
-  header: {
-    width: '100%',
-    padding: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: 5,
-    borderBottomColor: '',
-  },
-  lightsContainer: {
-    flexDirection: 'row',
-  },
-  light: {
-    width: 25,
-    height: 25,
-    borderRadius: 15,
-    marginRight: 8,
-    borderWidth: 2,
-    borderColor: '#fff',
-  },
-  lightBlue: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#3D7DCA',
-  },
-  lightRed: { backgroundColor: '#E53935' },
-  lightYellow: { backgroundColor: '#F2C14D' },
-  lightGreen: { backgroundColor: '#38A64F' },
-  screenContainer: {
-    width: '90%',
-    backgroundColor: '#E0E0E0',
-    borderRadius: 10,
-    padding: 15,
-    marginTop: 20,
-    borderWidth: 5,
-    borderColor: '#494949',
-  },
-  screen: {
-    backgroundColor: '#B0D0C0',
-    borderRadius: 8,
-    minHeight: 220,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 10,
-  },
-  pokemonImage: {
-    width: 140,
-    height: 140,
-    marginBottom: 5,
-  },
-  detailTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#333',
-    textTransform: 'capitalize',
-  },
-  detailText: {
-    fontSize: 16,
-    color: '#333',
-    textTransform: 'capitalize',
-  },
-  listContainer: {
-    flex: 1,
-    width: '90%',
-    backgroundColor: '#333',
-    borderRadius: 10,
-    padding: 10,
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  list: {
-    width: '100%',
-  },
-  listItem: {
-    backgroundColor: '#555',
-    padding: 12,
-    marginVertical: 4,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: '#777',
-  },
-  listItemText: {
-    fontSize: 16,
-    color: '#FFF',
-    fontWeight: '500',
-    textTransform: 'capitalize',
-  },
-});
-message.txt
-7 KB
+  // ================== STYLES ==================
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: '#DC0A2D',
+      alignItems: 'center',
+    },
+    screenContainer: {
+      width: '90%',
+      backgroundColor: '#E0E0E0',
+      borderRadius: 12,
+      padding: 15,
+      marginTop: 20,
+      borderWidth: 5,
+      borderColor: '#494949',
+    },
+    screen: {
+      backgroundColor: '#B0D0C0',
+      borderRadius: 10,
+      minHeight: 260,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    arrowContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      width: '100%',
+    },
+    arrowButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: '#2563EB',
+      justifyContent: 'center',
+      alignItems: 'center',
+      elevation: 3,
+    },
+    arrowPressed: {
+      transform: [{ scale: 0.95 }],
+    },
+    arrowIcon: {
+      fontSize: 28,
+      color: '#FFF',
+      fontWeight: '600',
+      marginTop: -2,
+    },
+    arrowDisabled: {
+      backgroundColor: '#9CA3AF',
+      opacity: 0.5,
+    },
+
+    // 🔒 tamanho padronizado
+    pokemonImageWrapper: {
+      width: 150,
+      height: 150,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    pokemonImage: {
+      width: 130,
+      height: 130,
+      resizeMode: 'contain',
+    },
+
+    shinyButton: {
+      marginTop: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      backgroundColor: '#FFD700',
+      borderRadius: 20,
+    },
+    shinyText: {
+      fontWeight: 'bold',
+      color: '#333',
+    },
+
+    detailTitle: {
+      fontSize: 22,
+      fontWeight: 'bold',
+      color: '#333',
+      marginTop: 8,
+      textTransform: 'capitalize',
+    },
+    detailText: {
+      fontSize: 16,
+      color: '#333',
+      textTransform: 'capitalize',
+    },
+    listContainer: {
+      flex: 1,
+      width: '90%',
+      backgroundColor: '#333',
+      borderRadius: 12,
+      padding: 10,
+      marginTop: 20,
+      marginBottom: 10,
+    },
+    searchInput: {
+      backgroundColor: '#222',
+      color: '#FFF',
+      padding: 10,
+      borderRadius: 8,
+      marginBottom: 10,
+      borderWidth: 1,
+      borderColor: '#555',
+    },
+    listItem: {
+      backgroundColor: '#555',
+      padding: 12,
+      marginVertical: 4,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: '#777',
+    },
+    listItemText: {
+      fontSize: 16,
+      color: '#FFF',
+      fontWeight: '500',
+      textTransform: 'capitalize',
+    },
+  });
